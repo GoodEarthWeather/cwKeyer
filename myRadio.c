@@ -26,6 +26,7 @@ volatile uint8_t radioMode;
 volatile uint8_t packetSent;
 volatile uint8_t packetReceived;
 int16_t rssi_dBm;
+uint8_t lqi;
 uint8_t dataChannel;
 extern struct systemStatus sysState;
 
@@ -218,6 +219,7 @@ void getRSSI(void)
     {
         rssi_dBm = (rssi_dec / 2) - rssi_offset;
     }
+    lqi = halRfReadStatusReg(CC1101_LQI);
 }
 
 

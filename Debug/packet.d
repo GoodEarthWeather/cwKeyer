@@ -41,7 +41,7 @@ packet.obj: C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/eu
 packet.obj: C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/timer_b.h
 packet.obj: C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/eusci_b_spi.h
 packet.obj: ../functionHeader.h
-packet.obj: C:/Users/fishi/git/repository/gws_a1_main/gws_a1_main/myInclude/command.h
+packet.obj: C:/Users/fishi/git/gws_a1_main/gws_a1_main/myInclude/command.h
 
 ../packet.c: 
 ../main.h: 
@@ -84,4 +84,4 @@ C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/eusci_a_spi.h:
 C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/timer_b.h: 
 C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/eusci_b_spi.h: 
 ../functionHeader.h: 
-C:/Users/fishi/git/repository/gws_a1_main/gws_a1_main/myInclude/command.h: 
+C:/Users/fishi/git/gws_a1_main/gws_a1_main/myInclude/command.h: 

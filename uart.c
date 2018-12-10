@@ -98,6 +98,7 @@ void USCI_A0_ISR(void)
     static uint8_t i = 0;
     uint8_t j, k;
     extern int16_t rssi_dBm;
+    extern uint8_t lqi;
     extern uint32_t epochTime;
     extern uint8_t hubID;
     extern struct systemStatus sysState;
@@ -154,6 +155,7 @@ void USCI_A0_ISR(void)
                 uartCommandBuffer[2] = CMD_RTN_HUB_RSSI;
                 uartCommandBuffer[3] = (uint8_t)(rssi_dBm & 0xFF); //lsb
                 uartCommandBuffer[4] = (uint8_t)(rssi_dBm >> 8);
+                uartCommandBuffer[5] = (uint8_t)(lqi);
                 responseBufferAdd(uartCommandBuffer);
                 break;
             case CMD_REQ_IHT :  // request for indoor humidity, temperature

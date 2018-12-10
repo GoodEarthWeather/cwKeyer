@@ -44,7 +44,7 @@ myRadio.obj: ../hal_rf.h
 myRadio.obj: ../main.h
 myRadio.obj: C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/driverlib.h
 myRadio.obj: ../functionHeader.h
-myRadio.obj: C:/Users/fishi/git/repository/gws_a1_main/gws_a1_main/myInclude/command.h
+myRadio.obj: C:/Users/fishi/git/gws_a1_main/gws_a1_main/myInclude/command.h
 
 ../myRadio.c: 
 C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/driverlib.h: 
@@ -90,4 +90,4 @@ C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/eusci_b_spi.h:
 ../main.h: 
 C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx/driverlib.h: 
 ../functionHeader.h: 
-C:/Users/fishi/git/repository/gws_a1_main/gws_a1_main/myInclude/command.h: 
+C:/Users/fishi/git/gws_a1_main/gws_a1_main/myInclude/command.h: 
