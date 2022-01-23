@@ -1,130 +1,137 @@
 
 #include "main.h"
+#include <timer_a.h>
 
-// define state machine
-uint8_t state;  // holds current state
 
-#define STATE_LISTEN_FOR_WAKEUP 1
-#define STATE_LISTEN_FOR_RESPONSE 2
-#define STATE_SEND_COMMAND 3
-#define STATE_SEND_RESPONSE_DATA 4
+#define STATE_WAIT_FOR_KEY 1
+#define STATE_DAH_KEY 2
+#define STATE_DIT_KEY 3
+#define STATE_REST 4
 
-#define SYNC_RADIO_CHANNEL 0
-#define MAX_RETRIES 5
-#define MAX_RESPONSEBUFFER_SIZE 20
+#define DIT 1
+#define DAH 2
 
-uint8_t radioCommandBuffer[64];  // to hold command from radio
-uint8_t radioResponseBuffer[MAX_RESPONSEBUFFER_SIZE][64];  // to hold response data from radio
-volatile uint8_t validRadioCommand = 0;  // true when command assembly is complete
-static uint8_t responseCount = 0;
-struct systemStatus sysState;
+#define DITKEYPORT GPIO_PORT_P1, GPIO_PIN6
+#define DAHKEYPORT GPIO_PORT_P1, GPIO_PIN5
+#define SHAPEKEYPORT GPIO_PORT_P2, GPIO_PIN2
+#define TRSWITCHPORT GPIO_PORT_P1, GPIO_PIN1
+#define TUNEPORT GPIO_PORT_P1, GPIO_PIN2
+#define SIDETONEPORT GPIO_PORT_P1, GPIO_PIN4
+#define MUTEPORT GPIO_PORT_P1, GPIO_PIN7
+#define KEYPORT GPIO_PORT_P1, GPIO_PIN1
 
 
 void main(void)
 {
-    extern volatile uint8_t timeOut;
-    uint8_t ucmd;
-    uint8_t status;
-    uint8_t reTry;
-    extern uint8_t dataChannel;
+    uint8_t lastKey;
+    uint8_t dahCount;
+    uint8_t done;
+    uint8_t ditKeyState;
+    uint8_t dahKeyState;
+    uint8_t state;  // holds current state
 
     WDT_A_hold(WDT_A_BASE);
 
-    sysState.upTimer = 0; // reset up time counter on power up or reset
     initGPIO();
     initClocks();
-    initUART();
-    initRTC();
+    initTimer(3932);  //start at 10wpm
+    initSideToneTimer();
+    initADC();
 
-    //getRFID();  // set node and hub addresses
+    // Timer runs continuously
+    Timer_A_startCounter(TIMER_A1_BASE,TIMER_A_UP_MODE);  // start timer
 
-    initRadio();
-
-    // now go to sleep and wait for 1 minute flag to wake up
-    state = STATE_LISTEN_FOR_WAKEUP;
+    // now wait for key press
+    state = STATE_WAIT_FOR_KEY;
 
     while (1)
     {
         switch (state)
         {
-        case STATE_LISTEN_FOR_WAKEUP :  // this state is used to synchronize the hub to the node
-            GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN0); // LED1 on
-            GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN3); // LED2 off
-            GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN1); // LED3 off
+        case STATE_WAIT_FOR_KEY :  // Wait for keyer signal (dit or dah)
+            //getSpeed();  // update speed
+            ditKeyState = GPIO_getInputPinValue(DITKEYPORT);
+            dahKeyState = GPIO_getInputPinValue(DAHKEYPORT);
+            if ((ditKeyState == GPIO_INPUT_PIN_LOW) && (dahKeyState == GPIO_INPUT_PIN_LOW))
+            {
+                if (lastKey == DAH)
+                {
+                    state = STATE_DIT_KEY;  // both keys pressed; last key was a dah, so now go to dit
+                } else {
+                    state = STATE_DAH_KEY;
+                }
+            }
+            else if (ditKeyState == GPIO_INPUT_PIN_LOW) {
+                state = STATE_DIT_KEY;
+            }
+            else if (dahKeyState == GPIO_INPUT_PIN_LOW) {
+                state = STATE_DAH_KEY;
+            }
+            else if (GPIO_getInputPinValue(TUNEPORT) == GPIO_INPUT_PIN_LOW) {
+                GPIO_setOutputHighOnPin(MUTEPORT);  // enable mute
+                GPIO_setOutputHighOnPin(SHAPEKEYPORT);  // set output high
+                GPIO_setOutputHighOnPin(TRSWITCHPORT);  // set TR switch output high
 
-            radioCommandBuffer[2] = 0;  // set to CMD_NULL
-            validRadioCommand = 0;
-            timeOut = 0; // no timeout function for wakeup, so reset timeOut flag in case it got previously set
-            status = rxRecvPacket(radioCommandBuffer,SYNC_RADIO_CHANNEL);  // radio mode receive packet
-            if ((radioCommandBuffer[2] == CMD_NODE_READY) && validRadioCommand)  // synchronized, so now send commands
-            {
-                dataChannel = radioCommandBuffer[4];  // get data channel to use
-                responseBufferAdd(radioCommandBuffer); // add CMD_NODE_READY to response buffer (to get the wind data)
-                reTry = 0;
-                state = STATE_SEND_COMMAND;
-            }
-            else
-            {
-                state = STATE_LISTEN_FOR_WAKEUP;  // go back and wait for query command
-            }
-            break;
-        case STATE_LISTEN_FOR_RESPONSE :
-            GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN0); // LED1 off
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN3); // LED2 on
-            GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN1); // LED3 off
-            radioCommandBuffer[2] = 0;  // set to CMD_NULL
-            validRadioCommand = 0;
-            startTimeOut();
-            status = rxRecvPacket(radioCommandBuffer, dataChannel);  // radio mode receive packet
-            stopTimeOut();
-            // should check for errors
-            if ( status == RX_OK )
-            {
-                responseBufferAdd(radioCommandBuffer);
-                reTry = 0;
-                state = STATE_SEND_COMMAND;  // send any additional commands
-            }
-            else if ( reTry < MAX_RETRIES )  // packet error - retry
-            {
-                reTry++;
-                sysState.reTryCount++;
-                state = STATE_SEND_COMMAND;
-            }
-            else  // packet error - but too many re-tries, so give up
-            {
-                clearCommandList();
-                reTry = 0;
-                state = STATE_LISTEN_FOR_WAKEUP;
+                Timer_A_startCounter(TIMER_A0_BASE,TIMER_A_UP_MODE);  // start side tone
+                while (GPIO_getInputPinValue(TUNEPORT) == GPIO_INPUT_PIN_LOW) { ; }
+                GPIO_setOutputLowOnPin(SHAPEKEYPORT);  // set output low
+                GPIO_setOutputLowOnPin(TRSWITCHPORT);  // set TR switch output low
+                GPIO_setOutputLowOnPin(MUTEPORT);  // disable mute
+                Timer_A_stop(TIMER_A0_BASE);  // stop side tone
+                }
+            else {
+                // no buttons pressed
+                GPIO_setOutputLowOnPin(MUTEPORT);  // disable mute
+                GPIO_setOutputLowOnPin(TRSWITCHPORT);  // set TR switch output low
+                getSpeed();  // update speed only when there is no key being pressed
+                state = STATE_WAIT_FOR_KEY;
             }
             break;
-        case STATE_SEND_COMMAND :
-            GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN0); // LED1 off
-            GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN3); // LED2 on
-            GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN1); // LED3 on
-            if ( !reTry )  // don't get next command if trying to re-send existing command
+        case STATE_DAH_KEY :  // dah key pressed
+            GPIO_setOutputHighOnPin(MUTEPORT);  // enable mute
+            GPIO_setOutputHighOnPin(SHAPEKEYPORT);  // set output high
+            GPIO_setOutputHighOnPin(TRSWITCHPORT);  // set TR switch output high
+            GPIO_setOutputHighOnPin(KEYPORT);  // follows key up/down
+            Timer_A_startCounter(TIMER_A0_BASE,TIMER_A_UP_MODE);  // start side tone
+            Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+            Timer_A_clear(TIMER_A1_BASE);  // clear timer
+            dahCount = 0;
+            while (dahCount < 3)
             {
-                ucmd = getUARTCommand();
+                done = Timer_A_getCaptureCompareInterruptStatus(TIMER_A1_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_0,TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG);
+                if (done == TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG)
+                {
+                    dahCount++;
+                    Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+                }
             }
-            if (ucmd)
-            {
-                buildPacket(ucmd);
-                sendPacket(dataChannel);  // send uart command to radio
-                state = STATE_LISTEN_FOR_RESPONSE;
-            }
-            else // no commands to send, so tell radio to go to sleep
-            {
-                getRSSI();  // first get RSSI
-                buildPacket(CMD_SET_SLEEP);
-                sendPacket(dataChannel);
-                state = STATE_SEND_RESPONSE_DATA;  // now send response data to console
-            }
+            GPIO_setOutputLowOnPin(SHAPEKEYPORT);  // set output low
+            lastKey = DAH;
+            state = STATE_REST;
             break;
-        case STATE_SEND_RESPONSE_DATA :   // this will send radio response data to console
-            GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN0); // LED1 off
-            GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN3); // LED2 off
-            GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN1); // LED3 on
-            responseBufferSend();
-            state = STATE_LISTEN_FOR_WAKEUP;
+        case STATE_DIT_KEY :  // dit key pressed; set output high for one unit
+            GPIO_setOutputHighOnPin(MUTEPORT);  // enable mute
+            GPIO_setOutputHighOnPin(SHAPEKEYPORT);  // set output high
+            GPIO_setOutputHighOnPin(TRSWITCHPORT);  // set TR switch output high
+            GPIO_setOutputHighOnPin(KEYPORT);  // follows key up/down
+            Timer_A_startCounter(TIMER_A0_BASE,TIMER_A_UP_MODE);  // start side tone
+            Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+            Timer_A_clear(TIMER_A1_BASE);  // clear timer
+            do {
+                done = Timer_A_getCaptureCompareInterruptStatus(TIMER_A1_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_0,TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG);
+            } while (done != TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG);
+            GPIO_setOutputLowOnPin(SHAPEKEYPORT);  // set output low
+            lastKey = DIT;
+            state = STATE_REST;
+            break;
+        case STATE_REST :   //  wait one unit
+            Timer_A_stop(TIMER_A0_BASE);  // stop side tone
+            GPIO_setOutputLowOnPin(KEYPORT);  // follows key up/down
+            Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+            do {
+                done = Timer_A_getCaptureCompareInterruptStatus(TIMER_A1_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_0,TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG);
+            } while (done != TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG);
+            state = STATE_WAIT_FOR_KEY;
             break;
         default :
             break;
@@ -132,40 +139,27 @@ void main(void)
     }
 }
 
-// Routine to add to responseBuffer
-void responseBufferAdd(uint8_t *data)
+// Routine to read speed potentiometer and update speed
+void getSpeed(void)
 {
-    uint8_t i;
-    for ( i = 0; i <= data[0]; i++ )
-    {
-        radioResponseBuffer[responseCount][i] = data[i];
-    }
-    // increase response counter, but don't increase if at limit of buffer size
-    // this will cause any more response buffer adds to over write the last entry
-    if ( ++responseCount == MAX_RESPONSEBUFFER_SIZE )
-        responseCount--;
-}
+    uint16_t result;
+    uint16_t wpm;
+    uint16_t count;
 
-// Routine to send responseBuffer contents to console
-void responseBufferSend(void)
-{
-    uint8_t i, j;
-    extern uint8_t nodeID;
+    // start ADC conversion
+    ADC_startConversion(ADC_BASE,ADC_SINGLECHANNEL);
+    while (ADC_isBusy(ADC_BASE) == ADC_BUSY) {;}
 
-    j = 0;
-    while (j < responseCount)
-    {
-        // go through radioResponseBuffer and send data
-        for ( i = 0; i <= radioResponseBuffer[j][0]; i++ )
-        {
-            EUSCI_A_UART_transmitData(EUSCI_A0_BASE,radioResponseBuffer[j][i]);
-        }
-        j++;
-    }
-    // now send end response cmd
-    EUSCI_A_UART_transmitData(EUSCI_A0_BASE,LENGTH_CMD_ENDRESPONSE);
-    EUSCI_A_UART_transmitData(EUSCI_A0_BASE,nodeID);
-    EUSCI_A_UART_transmitData(EUSCI_A0_BASE,CMD_ENDRESPONSE);
-    responseCount = 0;
+    // get results
+    result = (uint16_t)ADC_getResults(ADC_BASE);
+
+    // compute wpm
+    wpm = ((25*result)/888 + 3);
+
+    // compute count
+    count = 39322/wpm;
+
+    initTimer(count);  // update timer with new speed
+    Timer_A_startCounter(TIMER_A1_BASE,TIMER_A_UP_MODE);  // re-start timer
 }
 
