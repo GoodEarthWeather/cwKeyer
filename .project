@@ -24,10 +24,4 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<variableList>
-		<variable>
-			<name>MSP430_DRIVERLIB_INCLUDE_PATH</name>
-			<value>file:/C:/Users/fishi/git/repository/GEW-FFHUB/driverlib/MSP430FR2xx_4xx</value>
-		</variable>
-	</variableList>
 </projectDescription>
