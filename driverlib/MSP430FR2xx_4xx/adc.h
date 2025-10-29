@@ -1,34 +1,3 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
 //*****************************************************************************
 //
 // adc.h - Driver for the ADC Module.
@@ -227,9 +196,9 @@ extern "C"
 // parameter for functions: ADC_setResolution().
 //
 //*****************************************************************************
-#define ADC_RESOLUTION_8BIT                                               (0x0)
-#define ADC_RESOLUTION_10BIT                                             (0x10)
-#define ADC_RESOLUTION_12BIT                                             (0x20)
+#define ADC_RESOLUTION_8BIT                                            (0x0000)
+#define ADC_RESOLUTION_10BIT                                           (0x0010)
+#define ADC_RESOLUTION_12BIT                                           (0x0020)
 
 //*****************************************************************************
 //
@@ -527,7 +496,7 @@ extern void ADC_configureMemory(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_enableInterrupt(uint16_t baseAddress,
-                                uint8_t interruptMask);
+                                uint16_t interruptMask);
 
 //*****************************************************************************
 //
@@ -561,7 +530,7 @@ extern void ADC_enableInterrupt(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_disableInterrupt(uint16_t baseAddress,
-                                 uint8_t interruptMask);
+                                 uint16_t interruptMask);
 
 //*****************************************************************************
 //
@@ -597,7 +566,7 @@ extern void ADC_disableInterrupt(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_clearInterrupt(uint16_t baseAddress,
-                               uint8_t interruptFlagMask);
+                               uint16_t interruptFlagMask);
 
 //*****************************************************************************
 //
@@ -677,7 +646,7 @@ extern uint8_t ADC_getInterruptStatus(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_startConversion(uint16_t baseAddress,
-                                uint8_t conversionSequenceModeSelect);
+                                uint16_t conversionSequenceModeSelect);
 
 //*****************************************************************************
 //
@@ -751,7 +720,7 @@ extern int16_t ADC_getResults(uint16_t baseAddress);
 //
 //*****************************************************************************
 extern void ADC_setResolution(uint16_t baseAddress,
-                              uint8_t resolutionSelect);
+                              uint16_t resolutionSelect);
 
 //*****************************************************************************
 //

@@ -1,34 +1,3 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
 //*****************************************************************************
 //
 // adc.c - Driver for the adc Module.
@@ -128,19 +97,19 @@ void ADC_configureMemory(uint16_t baseAddress,
 }
 
 void ADC_enableInterrupt(uint16_t baseAddress,
-    uint8_t interruptMask)
+    uint16_t interruptMask)
 {
     HWREG16(baseAddress + OFS_ADCIE) |= interruptMask;
 }
 
 void ADC_disableInterrupt(uint16_t baseAddress,
-    uint8_t interruptMask)
+    uint16_t interruptMask)
 {
     HWREG16(baseAddress + OFS_ADCIE) &= ~(interruptMask);
 }
 
 void ADC_clearInterrupt(uint16_t baseAddress,
-    uint8_t interruptFlagMask)
+    uint16_t interruptFlagMask)
 {
     HWREG16(baseAddress + OFS_ADCIFG) &= ~(interruptFlagMask);
 }
@@ -152,7 +121,7 @@ uint8_t ADC_getInterruptStatus(uint16_t baseAddress,
 }
 
 void ADC_startConversion(uint16_t baseAddress,
-    uint8_t conversionSequenceModeSelect)
+    uint16_t conversionSequenceModeSelect)
 {
     //Reset the ENC bit to set the conversion mode sequence
     HWREG16(baseAddress + OFS_ADCCTL0) &= ~(ADCENC);
@@ -183,7 +152,7 @@ int16_t ADC_getResults(uint16_t baseAddress)
 }
 
 void ADC_setResolution(uint16_t baseAddress,
-    uint8_t resolutionSelect)
+    uint16_t resolutionSelect)
 {
     HWREG16(baseAddress + OFS_ADCCTL2) &= ~(ADCRES);
     HWREG16(baseAddress + OFS_ADCCTL2) |= resolutionSelect;

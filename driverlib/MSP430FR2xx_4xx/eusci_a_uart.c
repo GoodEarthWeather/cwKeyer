@@ -1,34 +1,3 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
 //*****************************************************************************
 //
 // eusci_a_uart.c - Driver for the eusci_a_uart Module.
@@ -58,7 +27,7 @@ bool EUSCI_A_UART_init(uint16_t baseAddress, EUSCI_A_UART_initParam *param)
 
     //Clock source select
     HWREG16(baseAddress + OFS_UCAxCTLW0) &= ~UCSSEL_3;
-    HWREG16(baseAddress + OFS_UCAxCTLW0) |= param->selectClockSource;
+    HWREG16(baseAddress + OFS_UCAxCTLW0) |= (uint16_t)param->selectClockSource;
 
     //MSB, LSB select
     HWREG16(baseAddress + OFS_UCAxCTLW0) &= ~UCMSB;
@@ -143,11 +112,11 @@ void EUSCI_A_UART_enableInterrupt (uint16_t baseAddress,
         | EUSCI_A_UART_STARTBIT_INTERRUPT
         | EUSCI_A_UART_TRANSMIT_COMPLETE_INTERRUPT));
 
-    HWREG16(baseAddress + OFS_UCAxIE) |= locMask;
+    HWREG16(baseAddress + OFS_UCAxIE) |= (uint16_t)locMask;
 
     locMask = (mask & (EUSCI_A_UART_RECEIVE_ERRONEOUSCHAR_INTERRUPT
         | EUSCI_A_UART_BREAKCHAR_INTERRUPT));
-    HWREG16(baseAddress + OFS_UCAxCTLW0) |= locMask;
+    HWREG16(baseAddress + OFS_UCAxCTLW0) |= (uint16_t)locMask;
 }
 
 void EUSCI_A_UART_disableInterrupt (uint16_t baseAddress,
@@ -160,11 +129,11 @@ void EUSCI_A_UART_disableInterrupt (uint16_t baseAddress,
         | EUSCI_A_UART_TRANSMIT_INTERRUPT
         | EUSCI_A_UART_STARTBIT_INTERRUPT
         | EUSCI_A_UART_TRANSMIT_COMPLETE_INTERRUPT));
-    HWREG16(baseAddress + OFS_UCAxIE) &= ~locMask;
+    HWREG16(baseAddress + OFS_UCAxIE) &= (uint16_t)~locMask;
 
     locMask = (mask & (EUSCI_A_UART_RECEIVE_ERRONEOUSCHAR_INTERRUPT
         | EUSCI_A_UART_BREAKCHAR_INTERRUPT));
-    HWREG16(baseAddress + OFS_UCAxCTLW0) &= ~locMask;
+    HWREG16(baseAddress + OFS_UCAxCTLW0) &= (uint16_t)~locMask;
 }
 
 uint8_t EUSCI_A_UART_getInterruptStatus (uint16_t baseAddress,
@@ -173,7 +142,7 @@ uint8_t EUSCI_A_UART_getInterruptStatus (uint16_t baseAddress,
     return ( HWREG16(baseAddress + OFS_UCAxIFG) & mask );
 }
 
-void EUSCI_A_UART_clearInterrupt (uint16_t baseAddress, uint8_t mask)
+void EUSCI_A_UART_clearInterrupt (uint16_t baseAddress, uint16_t mask)
 {
     //Clear the UART interrupt source.
     HWREG16(baseAddress + OFS_UCAxIFG) &= ~(mask);
@@ -261,6 +230,9 @@ void EUSCI_A_UART_remapPins (uint16_t baseAddress, uint8_t pinsSelect)
 {
 #ifdef USCIARMP
     HWREG16(SYS_BASE + OFS_SYSCFG3) &= ~USCIARMP;
+    HWREG16(SYS_BASE + OFS_SYSCFG3) |= pinsSelect;
+#elif defined(USCIA0RMP)
+    HWREG16(SYS_BASE + OFS_SYSCFG3) &= ~USCIA0RMP;
     HWREG16(SYS_BASE + OFS_SYSCFG3) |= pinsSelect;
 #endif
 }

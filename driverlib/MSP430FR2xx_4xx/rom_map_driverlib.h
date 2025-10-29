@@ -1,34 +1,3 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
 //*****************************************************************************
 //
 // rom_map_driverlib.h - Macros to facilitate calling DriverLib functions in
@@ -622,7 +591,7 @@
 
 //*****************************************************************************
 //
-// Macros for the EUSCIASPI API.
+// Macros for the EUSCI_A_SPI API.
 //
 //*****************************************************************************
 #ifdef ROM_EUSCI_A_SPI_initMaster
@@ -723,6 +692,13 @@
 #define MAP_EUSCI_A_SPI_getReceiveBufferAddress                               \
         EUSCI_A_SPI_getReceiveBufferAddress
 #endif
+#ifdef ROM_EUSCI_A_SPI_getTransmitBufferAddress
+#define MAP_EUSCI_A_SPI_getTransmitBufferAddress \
+    ROM_EUSCI_A_SPI_getTransmitBufferAddress
+#else
+#define MAP_EUSCI_A_SPI_getTransmitBufferAddress \
+    EUSCI_A_SPI_getTransmitBufferAddress
+#endif
 #ifdef ROM_EUSCI_A_SPI_isBusy
 #define MAP_EUSCI_A_SPI_isBusy                                                \
         ROM_EUSCI_A_SPI_isBusy
@@ -740,7 +716,7 @@
 
 //*****************************************************************************
 //
-// Macros for the EUSCIAUART API.
+// Macros for the EUSCI_A_UART API.
 //
 //*****************************************************************************
 #ifdef ROM_EUSCI_A_UART_init
@@ -872,7 +848,7 @@
 
 //*****************************************************************************
 //
-// Macros for the EUSCIBI2C API.
+// Macros for the EUSCI_B_I2C API.
 //
 //*****************************************************************************
 #ifdef ROM_EUSCI_B_I2C_initMaster
@@ -952,13 +928,6 @@
 #define MAP_EUSCI_B_I2C_masterIsStopSent                                      \
         EUSCI_B_I2C_masterIsStopSent
 #endif
-#ifdef ROM_EUSCI_B_I2C_masterReceiveSingleByte
-#define MAP_EUSCI_B_I2C_masterReceiveSingleByte                               \
-        ROM_EUSCI_B_I2C_masterReceiveSingleByte
-#else
-#define MAP_EUSCI_B_I2C_masterReceiveSingleByte                               \
-        EUSCI_B_I2C_masterReceiveSingleByte
-#endif
 #ifdef ROM_EUSCI_B_I2C_masterIsStartSent
 #define MAP_EUSCI_B_I2C_masterIsStartSent                                     \
         ROM_EUSCI_B_I2C_masterIsStartSent
@@ -1000,6 +969,13 @@
 #else
 #define MAP_EUSCI_B_I2C_masterSendSingleByte                                  \
         EUSCI_B_I2C_masterSendSingleByte
+#endif
+#ifdef ROM_EUSCI_B_I2C_masterReceiveSingleByte
+#define MAP_EUSCI_B_I2C_masterReceiveSingleByte \
+    ROM_EUSCI_B_I2C_masterReceiveSingleByte
+#else
+#define MAP_EUSCI_B_I2C_masterReceiveSingleByte \
+    EUSCI_B_I2C_masterReceiveSingleByte
 #endif
 #ifdef ROM_EUSCI_B_I2C_masterSendSingleByteWithTimeout
 #define MAP_EUSCI_B_I2C_masterSendSingleByteWithTimeout                       \
@@ -1148,10 +1124,17 @@
 #define MAP_EUSCI_B_I2C_remapPins                                             \
         EUSCI_B_I2C_remapPins
 #endif
+#ifdef ROM_EUSCI_B_I2C_setTimeout
+#define MAP_EUSCI_B_I2C_setTimeout                                            \
+        ROM_EUSCI_B_I2C_setTimeout
+#else
+#define MAP_EUSCI_B_I2C_setTimeout                                            \
+        EUSCI_B_I2C_setTimeout
+#endif
 
 //*****************************************************************************
 //
-// Macros for the EUSCIBSPI API.
+// Macros for the EUSCI_B_SPI API.
 //
 //*****************************************************************************
 #ifdef ROM_EUSCI_B_SPI_initMaster
@@ -1542,6 +1525,229 @@
 #else
 #define MAP_ICC_getICM0                                                       \
         ICC_getICM0
+#endif
+
+//*****************************************************************************
+//
+// Macros for the LCD_E API.
+//
+//*****************************************************************************
+#ifdef ROM_LCD_E_initParam
+#define MAP_LCD_E_initParam \
+    ROM_LCD_E_initParam
+#else
+#define MAP_LCD_E_initParam \
+    LCD_E_initParam
+#endif
+#ifdef ROM_LCD_E_init
+#define MAP_LCD_E_init \
+    ROM_LCD_E_init
+#else
+#define MAP_LCD_E_init \
+    LCD_E_init
+#endif
+#ifdef ROM_LCD_E_on
+#define MAP_LCD_E_on \
+    ROM_LCD_E_on
+#else
+#define MAP_LCD_E_on \
+    LCD_E_on
+#endif
+#ifdef ROM_LCD_E_off
+#define MAP_LCD_E_off \
+    ROM_LCD_E_off
+#else
+#define MAP_LCD_E_off \
+    LCD_E_off
+#endif
+#ifdef ROM_LCD_E_clearInterrupt
+#define MAP_LCD_E_clearInterrupt \
+    ROM_LCD_E_clearInterrupt
+#else
+#define MAP_LCD_E_clearInterrupt \
+    LCD_E_clearInterrupt
+#endif
+#ifdef ROM_LCD_E_getInterruptStatus
+#define MAP_LCD_E_getInterruptStatus \
+    ROM_LCD_E_getInterruptStatus
+#else
+#define MAP_LCD_E_getInterruptStatus \
+    LCD_E_getInterruptStatus
+#endif
+#ifdef ROM_LCD_E_enableInterrupt
+#define MAP_LCD_E_enableInterrupt \
+    ROM_LCD_E_enableInterrupt
+#else
+#define MAP_LCD_E_enableInterrupt \
+    LCD_E_enableInterrupt
+#endif
+#ifdef ROM_LCD_E_disableInterrupt
+#define MAP_LCD_E_disableInterrupt \
+    ROM_LCD_E_disableInterrupt
+#else
+#define MAP_LCD_E_disableInterrupt \
+    LCD_E_disableInterrupt
+#endif
+#ifdef ROM_LCD_E_clearAllMemory
+#define MAP_LCD_E_clearAllMemory \
+    ROM_LCD_E_clearAllMemory
+#else
+#define MAP_LCD_E_clearAllMemory \
+    LCD_E_clearAllMemory
+#endif
+#ifdef ROM_LCD_E_clearAllBlinkingMemory
+#define MAP_LCD_E_clearAllBlinkingMemory \
+    ROM_LCD_E_clearAllBlinkingMemory
+#else
+#define MAP_LCD_E_clearAllBlinkingMemory \
+    LCD_E_clearAllBlinkingMemory
+#endif
+#ifdef ROM_LCD_E_selectDisplayMemory
+#define MAP_LCD_E_selectDisplayMemory \
+    ROM_LCD_E_selectDisplayMemory
+#else
+#define MAP_LCD_E_selectDisplayMemory \
+    LCD_E_selectDisplayMemory
+#endif
+#ifdef ROM_LCD_E_setBlinkingControl
+#define MAP_LCD_E_setBlinkingControl \
+    ROM_LCD_E_setBlinkingControl
+#else
+#define MAP_LCD_E_setBlinkingControl \
+    LCD_E_setBlinkingControl
+#endif
+#ifdef ROM_LCD_E_enableChargePump
+#define MAP_LCD_E_enableChargePump \
+    ROM_LCD_E_enableChargePump
+#else
+#define MAP_LCD_E_enableChargePump \
+    LCD_E_enableChargePump
+#endif
+#ifdef ROM_LCD_E_disableChargePump
+#define MAP_LCD_E_disableChargePump \
+    ROM_LCD_E_disableChargePump
+#else
+#define MAP_LCD_E_disableChargePump \
+    LCD_E_disableChargePump
+#endif
+#ifdef ROM_LCD_E_setChargePumpFreq
+#define MAP_LCD_E_setChargePumpFreq \
+    ROM_LCD_E_setChargePumpFreq
+#else
+#define MAP_LCD_E_setChargePumpFreq \
+    LCD_E_setChargePumpFreq
+#endif
+#ifdef ROM_LCD_E_setVLCDSource
+#define MAP_LCD_E_setVLCDSource \
+    ROM_LCD_E_setVLCDSource
+#else
+#define MAP_LCD_E_setVLCDSource \
+    LCD_E_setVLCDSource
+#endif
+#ifdef ROM_LCD_E_setVLCDVoltage
+#define MAP_LCD_E_setVLCDVoltage \
+    ROM_LCD_E_setVLCDVoltage
+#else
+#define MAP_LCD_E_setVLCDVoltage \
+    LCD_E_setVLCDVoltage
+#endif
+#ifdef ROM_LCD_E_setReferenceMode
+#define MAP_LCD_E_setReferenceMode \
+    ROM_LCD_E_setReferenceMode
+#else
+#define MAP_LCD_E_setReferenceMode \
+    LCD_E_setReferenceMode
+#endif
+#ifdef ROM_LCD_E_setPinAsLCDFunction
+#define MAP_LCD_E_setPinAsLCDFunction \
+    ROM_LCD_E_setPinAsLCDFunction
+#else
+#define MAP_LCD_E_setPinAsLCDFunction \
+    LCD_E_setPinAsLCDFunction
+#endif
+#ifdef ROM_LCD_E_setPinAsPortFunction
+#define MAP_LCD_E_setPinAsPortFunction \
+    ROM_LCD_E_setPinAsPortFunction
+#else
+#define MAP_LCD_E_setPinAsPortFunction \
+    LCD_E_setPinAsPortFunction
+#endif
+#ifdef ROM_LCD_E_setPinAsLCDFunctionEx
+#define MAP_LCD_E_setPinAsLCDFunctionEx \
+    ROM_LCD_E_setPinAsLCDFunctionEx
+#else
+#define MAP_LCD_E_setPinAsLCDFunctionEx \
+    LCD_E_setPinAsLCDFunctionEx
+#endif
+#ifdef ROM_LCD_E_setPinAsCOM
+#define MAP_LCD_E_setPinAsCOM \
+    ROM_LCD_E_setPinAsCOM
+#else
+#define MAP_LCD_E_setPinAsCOM \
+    LCD_E_setPinAsCOM
+#endif
+#ifdef ROM_LCD_E_setPinAsSEG
+#define MAP_LCD_E_setPinAsSEG \
+    ROM_LCD_E_setPinAsSEG
+#else
+#define MAP_LCD_E_setPinAsSEG \
+    LCD_E_setPinAsSEG
+#endif
+#ifdef ROM_LCD_E_setMemory
+#define MAP_LCD_E_setMemory \
+    ROM_LCD_E_setMemory
+#else
+#define MAP_LCD_E_setMemory \
+    LCD_E_setMemory
+#endif
+#ifdef ROM_LCD_E_updateMemory
+#define MAP_LCD_E_updateMemory \
+    ROM_LCD_E_updateMemory
+#else
+#define MAP_LCD_E_updateMemory \
+    LCD_E_updateMemory
+#endif
+#ifdef ROM_LCD_E_toggleMemory
+#define MAP_LCD_E_toggleMemory \
+    ROM_LCD_E_toggleMemory
+#else
+#define MAP_LCD_E_toggleMemory \
+    LCD_E_toggleMemory
+#endif
+#ifdef ROM_LCD_E_clearMemory
+#define MAP_LCD_E_clearMemory \
+    ROM_LCD_E_clearMemory
+#else
+#define MAP_LCD_E_clearMemory \
+    LCD_E_clearMemory
+#endif
+#ifdef ROM_LCD_E_setBlinkingMemory
+#define MAP_LCD_E_setBlinkingMemory \
+    ROM_LCD_E_setBlinkingMemory
+#else
+#define MAP_LCD_E_setBlinkingMemory \
+    LCD_E_setBlinkingMemory
+#endif
+#ifdef ROM_LCD_E_updateBlinkingMemory
+#define MAP_LCD_E_updateBlinkingMemory \
+    ROM_LCD_E_updateBlinkingMemory
+#else
+#define MAP_LCD_E_updateBlinkingMemory \
+    LCD_E_updateBlinkingMemory
+#endif
+#ifdef ROM_LCD_E_toggleBlinkingMemory
+#define MAP_LCD_E_toggleBlinkingMemory \
+    ROM_LCD_E_toggleBlinkingMemory
+#else
+#define MAP_LCD_E_toggleBlinkingMemory \
+    LCD_E_toggleBlinkingMemory
+#endif
+#ifdef ROM_LCD_E_clearBlinkingMemory
+#define MAP_LCD_E_clearBlinkingMemory \
+    ROM_LCD_E_clearBlinkingMemory
+#else
+#define MAP_LCD_E_clearBlinkingMemory \
+    LCD_E_clearBlinkingMemory
 #endif
 
 //*****************************************************************************
@@ -2310,7 +2516,215 @@
 
 //*****************************************************************************
 //
-// Macros for the TIMERB API.
+// Macros for the TIA API.
+//
+//*****************************************************************************
+#ifdef ROM_TIA_selectPositiveInput
+#define MAP_TIA_selectPositiveInput \
+    ROM_TIA_selectPositiveInput
+#else
+#define MAP_TIA_selectPositiveInput \
+    TIA_selectPositiveInput
+#endif
+#ifdef ROM_TIA_selectPowerMode
+#define MAP_TIA_selectPowerMode \
+    ROM_TIA_selectPowerMode
+#else
+#define MAP_TIA_selectPowerMode \
+    TIA_selectPowerMode
+#endif
+#ifdef ROM_TIA_enable
+#define MAP_TIA_enable \
+    ROM_TIA_enable
+#else
+#define MAP_TIA_enable \
+    TIA_enable
+#endif
+#ifdef ROM_TIA_disable
+#define MAP_TIA_disable \
+    ROM_TIA_disable
+#else
+#define MAP_TIA_disable \
+    TIA_disable
+#endif
+
+//*****************************************************************************
+//
+// Macros for the TIMER_A API.
+//
+//*****************************************************************************
+#ifdef ROM_Timer_A_startCounter
+#define MAP_Timer_A_startCounter \
+    ROM_Timer_A_startCounter
+#else
+#define MAP_Timer_A_startCounter \
+    Timer_A_startCounter
+#endif
+#ifdef ROM_Timer_A_initContinuousMode
+#define MAP_Timer_A_initContinuousMode \
+    ROM_Timer_A_initContinuousMode
+#else
+#define MAP_Timer_A_initContinuousMode \
+    Timer_A_initContinuousMode
+#endif
+#ifdef ROM_Timer_A_initUpMode
+#define MAP_Timer_A_initUpMode \
+    ROM_Timer_A_initUpMode
+#else
+#define MAP_Timer_A_initUpMode \
+    Timer_A_initUpMode
+#endif
+#ifdef ROM_Timer_A_initUpDownMode
+#define MAP_Timer_A_initUpDownMode \
+    ROM_Timer_A_initUpDownMode
+#else
+#define MAP_Timer_A_initUpDownMode \
+    Timer_A_initUpDownMode
+#endif
+#ifdef ROM_Timer_A_initCaptureMode
+#define MAP_Timer_A_initCaptureMode \
+    ROM_Timer_A_initCaptureMode
+#else
+#define MAP_Timer_A_initCaptureMode \
+    Timer_A_initCaptureMode
+#endif
+#ifdef ROM_Timer_A_initCompareMode
+#define MAP_Timer_A_initCompareMode \
+    ROM_Timer_A_initCompareMode
+#else
+#define MAP_Timer_A_initCompareMode \
+    Timer_A_initCompareMode
+#endif
+#ifdef ROM_Timer_A_enableInterrupt
+#define MAP_Timer_A_enableInterrupt \
+    ROM_Timer_A_enableInterrupt
+#else
+#define MAP_Timer_A_enableInterrupt \
+    Timer_A_enableInterrupt
+#endif
+#ifdef ROM_Timer_A_disableInterrupt
+#define MAP_Timer_A_disableInterrupt \
+    ROM_Timer_A_disableInterrupt
+#else
+#define MAP_Timer_A_disableInterrupt \
+    Timer_A_disableInterrupt
+#endif
+#ifdef ROM_Timer_A_getInterruptStatus
+#define MAP_Timer_A_getInterruptStatus \
+    ROM_Timer_A_getInterruptStatus
+#else
+#define MAP_Timer_A_getInterruptStatus \
+    Timer_A_getInterruptStatus
+#endif
+#ifdef ROM_Timer_A_enableCaptureCompareInterrupt
+#define MAP_Timer_A_enableCaptureCompareInterrupt \
+    ROM_Timer_A_enableCaptureCompareInterrupt
+#else
+#define MAP_Timer_A_enableCaptureCompareInterrupt \
+    Timer_A_enableCaptureCompareInterrupt
+#endif
+#ifdef ROM_Timer_A_disableCaptureCompareInterrupt
+#define MAP_Timer_A_disableCaptureCompareInterrupt \
+    ROM_Timer_A_disableCaptureCompareInterrupt
+#else
+#define MAP_Timer_A_disableCaptureCompareInterrupt \
+    Timer_A_disableCaptureCompareInterrupt
+#endif
+#ifdef ROM_Timer_A_getCaptureCompareInterruptStatus
+#define MAP_Timer_A_getCaptureCompareInterruptStatus \
+    ROM_Timer_A_getCaptureCompareInterruptStatus
+#else
+#define MAP_Timer_A_getCaptureCompareInterruptStatus \
+    Timer_A_getCaptureCompareInterruptStatus
+#endif
+#ifdef ROM_Timer_A_clear
+#define MAP_Timer_A_clear \
+    ROM_Timer_A_clear
+#else
+#define MAP_Timer_A_clear \
+    Timer_A_clear
+#endif
+#ifdef ROM_Timer_A_getSynchronizedCaptureCompareInput
+#define MAP_Timer_A_getSynchronizedCaptureCompareInput \
+    ROM_Timer_A_getSynchronizedCaptureCompareInput
+#else
+#define MAP_Timer_A_getSynchronizedCaptureCompareInput \
+    Timer_A_getSynchronizedCaptureCompareInput
+#endif
+#ifdef ROM_Timer_A_getOutputForOutputModeOutBitValue
+#define MAP_Timer_A_getOutputForOutputModeOutBitValue \
+    ROM_Timer_A_getOutputForOutputModeOutBitValue
+#else
+#define MAP_Timer_A_getOutputForOutputModeOutBitValue \
+    Timer_A_getOutputForOutputModeOutBitValue
+#endif
+#ifdef ROM_Timer_A_getCaptureCompareCount
+#define MAP_Timer_A_getCaptureCompareCount \
+    ROM_Timer_A_getCaptureCompareCount
+#else
+#define MAP_Timer_A_getCaptureCompareCount \
+    Timer_A_getCaptureCompareCount
+#endif
+#ifdef ROM_Timer_A_setOutputForOutputModeOutBitValue
+#define MAP_Timer_A_setOutputForOutputModeOutBitValue \
+    ROM_Timer_A_setOutputForOutputModeOutBitValue
+#else
+#define MAP_Timer_A_setOutputForOutputModeOutBitValue \
+    Timer_A_setOutputForOutputModeOutBitValue
+#endif
+#ifdef ROM_Timer_A_outputPWM
+#define MAP_Timer_A_outputPWM \
+    ROM_Timer_A_outputPWM
+#else
+#define MAP_Timer_A_outputPWM \
+    Timer_A_outputPWM
+#endif
+#ifdef ROM_Timer_A_stop
+#define MAP_Timer_A_stop \
+    ROM_Timer_A_stop
+#else
+#define MAP_Timer_A_stop \
+    Timer_A_stop
+#endif
+#ifdef ROM_Timer_A_setCompareValue
+#define MAP_Timer_A_setCompareValue \
+    ROM_Timer_A_setCompareValue
+#else
+#define MAP_Timer_A_setCompareValue \
+    Timer_A_setCompareValue
+#endif
+#ifdef ROM_Timer_A_setOutputMode
+#define MAP_Timer_A_setOutputMode \
+    ROM_Timer_A_setOutputMode
+#else
+#define MAP_Timer_A_setOutputMode \
+    Timer_A_setOutputMode
+#endif
+#ifdef ROM_Timer_A_clearTimerInterrupt
+#define MAP_Timer_A_clearTimerInterrupt \
+    ROM_Timer_A_clearTimerInterrupt
+#else
+#define MAP_Timer_A_clearTimerInterrupt \
+    Timer_A_clearTimerInterrupt
+#endif
+#ifdef ROM_Timer_A_clearCaptureCompareInterrupt
+#define MAP_Timer_A_clearCaptureCompareInterrupt \
+    ROM_Timer_A_clearCaptureCompareInterrupt
+#else
+#define MAP_Timer_A_clearCaptureCompareInterrupt \
+    Timer_A_clearCaptureCompareInterrupt
+#endif
+#ifdef ROM_Timer_A_getCounterValue
+#define MAP_Timer_A_getCounterValue \
+    ROM_Timer_A_getCounterValue
+#else
+#define MAP_Timer_A_getCounterValue \
+    Timer_A_getCounterValue
+#endif
+
+//*****************************************************************************
+//
+// Macros for the TIMER_B API.
 //
 //*****************************************************************************
 #ifdef ROM_Timer_B_startCounter
@@ -2560,7 +2974,7 @@
 
 //*****************************************************************************
 //
-// Macros for the WDTA API.
+// Macros for the WDT_A API.
 //
 //*****************************************************************************
 #ifdef ROM_WDT_A_hold

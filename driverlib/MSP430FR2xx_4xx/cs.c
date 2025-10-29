@@ -1,34 +1,3 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
 //*****************************************************************************
 //
 // cs.c - Driver for the cs Module.
@@ -126,7 +95,7 @@ static uint32_t privateCSSourceClockFromDCO(uint16_t FLLRefCLKSource)
 {
     uint16_t N_value;
     uint16_t n_value = 1;
-    uint32_t Fref_value;
+    uint32_t Fref_value = 1;
 
     N_value = (HWREG16(CS_BASE + OFS_CSCTL2)) & 0x03FF;
     uint16_t tempDivider = HWREG8(CS_BASE + OFS_CSCTL3) & FLLREFDIV_7;
@@ -135,7 +104,7 @@ static uint32_t privateCSSourceClockFromDCO(uint16_t FLLRefCLKSource)
         n_value = 32 << (tempDivider-1);
     }
 
-    switch ( (HWREG8(CS_BASE + OFS_CSCTL3)) & SELREF_3) {
+    switch ( (HWREG8(CS_BASE + OFS_CSCTL3)) & SELREF_3 ) {
         case SELREF__XT1CLK:
             Fref_value = privateXT1ClockFrequency;
 
@@ -148,13 +117,12 @@ static uint32_t privateCSSourceClockFromDCO(uint16_t FLLRefCLKSource)
                     if (HWREG16(CS_BASE + OFS_CSCTL6) & XTS) {
                         HWREG8(CS_BASE + OFS_CSCTL7) &= ~DCOFFG;
                         Fref_value = privateDCORange();
-                    }
+                    }   // XTS
                     else {
                         Fref_value = CS_REFOCLK_FREQUENCY;
-                    }
-                }
-
-            }
+                    }   // XTS
+                }   // XT1OFFG #2
+            }   // XT1OFFG #1
             break;
         case SELREF__REFOCLK:
             Fref_value = CS_REFOCLK_FREQUENCY;
@@ -162,7 +130,7 @@ static uint32_t privateCSSourceClockFromDCO(uint16_t FLLRefCLKSource)
         default: break;
     }
 
-    return (Fref_value * ( N_value + 1) / n_value);
+    return (Fref_value * (N_value + 1) / n_value);
 }
 
 static uint32_t privateCSComputeCLKFrequency(uint16_t CLKSource,
@@ -638,6 +606,11 @@ bool CS_initFLL(uint16_t fsystem,
     //the clock setup.
     uint16_t srRegisterState = __get_SR_register() & SCG0;
 
+    //Do not want the Oscillator Fault Flag to trigger during this routine.
+    //So disable interrupt, save the state, and reapply later if necessary.
+    uint8_t sfr_ofie_status = HWREG8(SFR_BASE + OFS_SFRIE1_L) & OFIE;
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) &= ~(OFIE);
+
     //Have at least a divider of 2
     dco_FLLN = ratio;
 
@@ -671,28 +644,28 @@ bool CS_initFLL(uint16_t fsystem,
     HWREG16(CS_BASE + OFS_CSCTL2) = dco_FLLD | (dco_FLLN - 1);
 
     HWREG8(CS_BASE + OFS_CSCTL1) &= ~DCORSEL_7;
-    if (fsystem <= 1000) {           //fsystem <= 1MHz
+    if (fsystem <= 1500) {            //fsystem <= 1.5MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_0;
     }
-    else if (fsystem <=  2000) {      //1MHz < fsystem <= 2MHz
+    else if (fsystem <=  3000) {      //1.5MHz < fsystem <= 3MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_1;
     }
-    else if (fsystem <=  4000) {      //2MHz < fsystem <=  4MHz
+    else if (fsystem <=  6000) {      //3MHz < fsystem <= 6MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_2;
     }
-    else if (fsystem <=  8000) {      //4MHz  < fsystem <=  8MHz
+    else if (fsystem <=  10000) {     //6MHz < fsystem <= 10MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_3;
     }
-    else if (fsystem <=  12000) {     //8MHz    < fsystem <= 12MHz
+    else if (fsystem <=  14000) {     //10MHz < fsystem <= 14MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_4;
     }
-    else if (fsystem <=  16000) {     //12MHz   < fsystem <=  16MHz
+    else if (fsystem <=  18000) {     //14MHz < fsystem <= 18MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_5;
     }
-    else if (fsystem <=  20000) {    //16MHz    < fsystem <=  20MHz
+    else if (fsystem <=  22000) {     //18MHz < fsystem <= 22MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_6;
     }
-    else if (fsystem <=  24000) {    //20MHz    < fsystem <=  24MHz
+    else if (fsystem <=  24000) {     //22MHz < fsystem <= 24MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_7;
     }
     else {
@@ -715,7 +688,10 @@ bool CS_initFLL(uint16_t fsystem,
 
     // Restore previous SCG0
     __bis_SR_register(srRegisterState);
-    
+
+    // Reapply Oscillator Fault Interrupt Enable if needed
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) |= sfr_ofie_status;
+
     return status;
 }
 
@@ -732,6 +708,11 @@ bool CS_initFLLCalculateTrim(uint16_t fsystem,
     //prevent the FLL from acting as we are making fundamental modifications to
     //the clock setup.
     uint16_t srRegisterState = __get_SR_register() & SCG0;
+
+    //Do not want the Oscillator Fault Flag to trigger during this routine.
+    //So disable interrupt, save the state, and reapply later if necessary.
+    uint8_t sfr_ofie_status = HWREG8(SFR_BASE + OFS_SFRIE1_L) & OFIE;
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) &= ~(OFIE);
 
     //Have at least a divider of 2
     dco_FLLN = ratio;
@@ -765,28 +746,28 @@ bool CS_initFLLCalculateTrim(uint16_t fsystem,
     HWREG16(CS_BASE + OFS_CSCTL2) = dco_FLLD | (dco_FLLN - 1);
 
     HWREG8(CS_BASE + OFS_CSCTL1) &= ~DCORSEL_7;
-    if (fsystem <= 1000) {           //fsystem <= 1MHz
+    if (fsystem <= 1500) {            //fsystem <= 1.5MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_0;
     }
-    else if (fsystem <=  2000) {      //1MHz < fsystem <= 2MHz
+    else if (fsystem <=  3000) {      //1.5MHz < fsystem <= 3MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_1;
     }
-    else if (fsystem <=  4000) {      //2MHz < fsystem <=  4MHz
+    else if (fsystem <=  6000) {      //3MHz < fsystem <= 6MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_2;
     }
-    else if (fsystem <=  8000) {      //4MHz  < fsystem <=  8MHz
+    else if (fsystem <=  10000) {     //6MHz < fsystem <= 10MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_3;
     }
-    else if (fsystem <=  12000) {     //8MHz    < fsystem <= 12MHz
+    else if (fsystem <=  14000) {     //10MHz < fsystem <= 14MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_4;
     }
-    else if (fsystem <=  16000) {     //12MHz   < fsystem <=  16MHz
+    else if (fsystem <=  18000) {     //14MHz < fsystem <= 18MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_5;
     }
-    else if (fsystem <=  20000) {     //16MHz   < fsystem <= 20MHz
+    else if (fsystem <=  22000) {     //18MHz < fsystem <= 22MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_6;
     }
-    else if (fsystem <=  24000) {     //20MHz   < fsystem <=  24MHz
+    else if (fsystem <=  24000) {     //22MHz < fsystem <= 24MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_7;
     }
     else {
@@ -821,6 +802,8 @@ bool CS_initFLLCalculateTrim(uint16_t fsystem,
     {
         __delay_cycles(30);
     }
+    // Reapply Oscillator Fault Interrupt Enable if needed
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) |= sfr_ofie_status;
     
     return status;
 }
@@ -844,6 +827,11 @@ bool CS_initFLLLoadTrim(uint16_t fsystem,
     //prevent the FLL from acting as we are making fundamental modifications to
     //the clock setup.
     uint16_t srRegisterState = __get_SR_register() & SCG0;
+
+    //Do not want the Oscillator Fault Flag to trigger during this routine.
+    //So disable interrupt, save the state, and reapply later if necessary.
+    uint8_t sfr_ofie_status = HWREG8(SFR_BASE + OFS_SFRIE1_L) & OFIE;
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) &= ~(OFIE);
 
     //Have at least a divider of 2
     dco_FLLN = ratio;
@@ -890,28 +878,28 @@ bool CS_initFLLLoadTrim(uint16_t fsystem,
     
     // Set proper DCORSEL value
     HWREG8(CS_BASE + OFS_CSCTL1) &= ~DCORSEL_7;
-    if (fsystem <= 1000) {           //fsystem <= 1MHz
+    if (fsystem <= 1500) {            //fsystem <= 1.5MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_0;
     }
-    else if (fsystem <=  2000) {      //1MHz < fsystem <= 2MHz
+    else if (fsystem <=  3000) {      //1.5MHz < fsystem <= 3MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_1;
     }
-    else if (fsystem <=  4000) {      //2MHz < fsystem <=  4MHz
+    else if (fsystem <=  6000) {      //3MHz < fsystem <= 6MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_2;
     }
-    else if (fsystem <=  8000) {      //4MHz  < fsystem <=  8MHz
+    else if (fsystem <=  10000) {     //6MHz < fsystem <= 10MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_3;
     }
-    else if (fsystem <=  12000) {     //8MHz    < fsystem <= 12MHz
+    else if (fsystem <=  14000) {     //10MHz < fsystem <= 14MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_4;
     }
-    else if (fsystem <=  16000) {     //12MHz   < fsystem <=  16MHz
+    else if (fsystem <=  18000) {     //14MHz < fsystem <= 18MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_5;
     }
-    else if (fsystem <=  20000) {     //16MHz   < fsystem <= 20MHz
+    else if (fsystem <=  22000) {     //18MHz < fsystem <= 22MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_6;
     }
-    else if (fsystem <=  24000) {     //20MHz   < fsystem <=  24MHz
+    else if (fsystem <=  24000) {     //22MHz < fsystem <= 24MHz
         HWREG8(CS_BASE + OFS_CSCTL1) |= DCORSEL_7;
     }
     else {
@@ -946,6 +934,8 @@ bool CS_initFLLLoadTrim(uint16_t fsystem,
     {
         __delay_cycles(30);
     }
+    // Reapply Oscillator Fault Interrupt Enable if needed
+    HWREG8(SFR_BASE + OFS_SFRIE1_L) |= sfr_ofie_status;
     
     return status;
 }
